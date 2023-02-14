@@ -542,6 +542,7 @@ API.Common = {
      * @param {string} type 转换类型，默认HTML,MD
      */
     formatTopic(content, type) {
+        return content
         content = (content || "") + "";
         var t = content.split(/(#(?:.|<br\/>)+?#)/g);
         var o = false;
@@ -2413,12 +2414,15 @@ TPL.BLOGS_TYPE_LIST = `
 
 /**
  * 好友列表单个好友模板
+ * 修改：<img src="<%:=API.Common.getMediaPath(API.Common.getUserLogoUrl(friend.uin), friend.custom_avatar, "Friends_HTML")%>">
+ * -> <img src="<%:=API.Common.getUserLogoUrl(friend.uin)%>">
+ * 
  */
 TPL.FRIENDS_LIST_ITEM = `
  <div class="list-group-item list-group-item-action mb-2">
      <div class="align-middle mb-2">
         <a class="avatar" href="<%:=API.Common.getUserUrl(friend.uin)%>" target="_blank" title="访问TA的QQ空间">
-            <img src="<%:=API.Common.getMediaPath(API.Common.getUserLogoUrl(friend.uin), friend.custom_avatar, "Friends_HTML")%>">
+            <img src="<%:=API.Common.getUserLogoUrl(friend.uin)%>">
         </a>
         <span title="备注/昵称" class="ml-2"><%:=API.Common.formatContent(friend.remark || friend.name)%></span>
      </div>

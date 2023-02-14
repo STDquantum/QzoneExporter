@@ -1,87 +1,30 @@
 {
-"update_url": "https://clients2.google.com/service/update2/crx",
-
-    "manifest_version": 2,
-    "name": "QQ空间导出助手",
-    "description": "QQ空间导出助手，用于导出备份QQ空间的说说、日志、私密日记、相册、视频、留言板、QQ好友、收藏夹、分享、访客为文件，便于迁移与保存",
-    "version": "1.1.8",
-    "icons": {
-        "128": "img/icon-128.png"
-    },
-    "homepage_url": "https://github.com/ShunCai/QZoneExport",
-    "background": {
-        "persistent": false,
-        "scripts": [
-            "js/background.js"
-        ]
-    },
-    "content_scripts": [
-        {
-            "matches": [
-                "https://*.qzone.qq.com/*"
-            ],
-            "js": [
-                "vendor/thunder/thunder-link.js",
-                "vendor/jquery/jquery.min.js",
-                "vendor/bootstrap/js/bootstrap.bundle.min.js",
-                "vendor/bootstrap/js/bootstrap-table.min.js",
-                "vendor/bootstrap/js/bootstrap-table-zh-CN.min.js",
-                "vendor/turndown/turndown.js",
-                "vendor/lodash/lodash.min.js",
-                "vendor/filer/filer.min.js",
-                "vendor/jszip/jszip.min.js",
-                "vendor/FileSaver/FileSaver.min.js",
-                "vendor/ponyfill/ponyfill.min.js",
-                "vendor/blob/Blob.js",
-                "vendor/sheetjs/xlsx.full.min.js",
-                "vendor/template/template.js",
-                "js/utils.js",
-                "js/config.js",
-                "js/api.js",
-                "js/content.js",
-                "js/modules/common.js",
-                "js/modules/messages.js",
-                "js/modules/blogs.js",
-                "js/modules/diaries.js",
-                "js/modules/photos.js",
-                "js/modules/videos.js",
-                "js/modules/boards.js",
-                "js/modules/friends.js",
-                "js/modules/favorites.js",
-                "js/modules/shares.js",
-                "js/modules/visitors.js"
-            ],
-            "css": [
-                "vendor/bootstrap/css/bootstrap.min.css",
-                "vendor/bootstrap/css/bootstrap-table.min.css",
-                "css/content.css"
-            ]
-        }
-    ],
-    "page_action": {
-        "default_icon": "img/icon-128.png",
-        "default_title": "QQ空间导出助手",
-        "default_popup": "html/popup.html"
-    },
-    "options_page": "html/options.html",
-    "content_security_policy": "script-src 'self' 'unsafe-eval' https://open.thunderurl.com/ https://res-etl-ssl.xunlei.com/ https://cdn.jsdelivr.net/ https://fastly.jsdelivr.net/ https://gcore.jsdelivr.net/ https://cdn.staticfile.org/ http://127.0.0.1; frame-src 'self' https://open.thunderurl.com/ https://res-etl-ssl.xunlei.com/ https://cdn.jsdelivr.net/ https://fastly.jsdelivr.net/ https://gcore.jsdelivr.net/ https://cdn.staticfile.org/; object-src 'self'",
-    "web_accessible_resources": [
-        "html/indicator.html",
-        "export/*.*",
-        "templates/*.*",
-        "vendor/*.*"
-    ],
-    "permissions": [
-        "activeTab",
-        "cookies",
-        "notifications",
-        "storage",
-        "unlimitedStorage",
-        "downloads",
-        "downloads.shelf",
-        "declarativeContent",
-        "clipboardWrite",
-        "declarativeNetRequest",
-        "<all_urls>"
-    ]
+   "background": {
+      "persistent": false,
+      "scripts": [ "js/background.js" ]
+   },
+   "content_scripts": [ {
+      "css": [ "vendor/bootstrap/css/bootstrap.min.css", "vendor/bootstrap/css/bootstrap-table.min.css", "css/content.css" ],
+      "js": [ "vendor/thunder/thunder-link.js", "vendor/jquery/jquery.min.js", "vendor/bootstrap/js/bootstrap.bundle.min.js", "vendor/bootstrap/js/bootstrap-table.min.js", "vendor/bootstrap/js/bootstrap-table-zh-CN.min.js", "vendor/turndown/turndown.js", "vendor/lodash/lodash.min.js", "vendor/filer/filer.min.js", "vendor/jszip/jszip.min.js", "vendor/FileSaver/FileSaver.min.js", "vendor/ponyfill/ponyfill.min.js", "vendor/blob/Blob.js", "vendor/sheetjs/xlsx.full.min.js", "vendor/template/template.js", "js/utils.js", "js/config.js", "js/api.js", "js/content.js", "js/modules/common.js", "js/modules/messages.js", "js/modules/blogs.js", "js/modules/diaries.js", "js/modules/photos.js", "js/modules/videos.js", "js/modules/boards.js", "js/modules/friends.js", "js/modules/favorites.js", "js/modules/shares.js", "js/modules/visitors.js" ],
+      "matches": [ "https://*.qzone.qq.com/*" ]
+   } ],
+   "content_security_policy": "script-src 'self' 'unsafe-eval' https://open.thunderurl.com/ https://res-etl-ssl.xunlei.com/ https://cdn.jsdelivr.net/ https://fastly.jsdelivr.net/ https://gcore.jsdelivr.net/ https://cdn.staticfile.org/ http://127.0.0.1; frame-src 'self' https://open.thunderurl.com/ https://res-etl-ssl.xunlei.com/ https://cdn.jsdelivr.net/ https://fastly.jsdelivr.net/ https://gcore.jsdelivr.net/ https://cdn.staticfile.org/; object-src 'self'",
+   "description": "QQ空间导出助手，用于导出备份QQ空间的说说、日志、私密日记、相册、视频、留言板、QQ好友、收藏夹、分享、访客为文件，便于迁移与保存",
+   "homepage_url": "https://github.com/ShunCai/QZoneExport",
+   "icons": {
+      "128": "img/icon-128.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArC2mYR0TqdEBQ/CPvdTEQ3GIujfVtqMYGQGWVLXNt0+9OL74/mzDWrEpSPRrpTVQ4UmTQQC7e2oCuo2fkht/pEpmyl/hl1Xiyu/zH0EnURUv+U04aZneWFa7jUgafWecrKXHqkUeXG5Wd5C4P+XqVdRzWDBTB7XNfPVXhXtIAB+4Ro+Gv4dKr8GSh0pGrORKdcjBIKoN8EbRr/eH4uMobGLN/EgbkMMkxeniT8eDcCaLYrLCU9qAsM/jcQeoitsyvyYOGS3YOnznX/wxOXfubqkmxsItSzqWfx/HZlwHLf3Zwkn/VMIpfZDwTISBDnd0copQrW367BhsxH1agLFkBwIDAQAB",
+   "manifest_version": 2,
+   "name": "QQ空间导出助手",
+   "options_page": "html/options.html",
+   "page_action": {
+      "default_icon": "img/icon-128.png",
+      "default_popup": "html/popup.html",
+      "default_title": "QQ空间导出助手"
+   },
+   "permissions": [ "activeTab", "cookies", "notifications", "storage", "unlimitedStorage", "downloads", "downloads.shelf", "declarativeContent", "clipboardWrite", "declarativeNetRequest", "\u003Call_urls>" ],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "1.1.8",
+   "web_accessible_resources": [ "html/indicator.html", "export/*.*", "templates/*.*", "vendor/*.*" ]
 }

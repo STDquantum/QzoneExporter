@@ -1304,16 +1304,18 @@ API.Common.downloadUserAvatar = (user) => {
     if (QZone.Common.FILE_URLS.has(avatarUrl)) {
         // 添加过下载任务则跳过
         user.avatar = API.Common.getUserLogoUrl(user.uin);
-        user.custom_avatar = API.Common.getUserLogoLocalUrl(user.uin);
+        user.custom_avatar = API.Common.getUserLogoUrl(user.uin);
+        // user.custom_avatar = API.Common.getUserLogoLocalUrl(user.uin);
         return;
     }
 
-    API.Utils.newDownloadTask('Friends', avatarUrl, 'Common/images', user.uin + '', user);
+    // API.Utils.newDownloadTask('Friends', avatarUrl, 'Common/images', user.uin + '', user);
     user.avatar = API.Common.getUserLogoUrl(user.uin);
-    user.custom_avatar = API.Common.getUserLogoLocalUrl(user.uin);
+    user.custom_avatar = API.Common.getUserLogoUrl(user.uin);
+    // user.custom_avatar = API.Common.getUserLogoLocalUrl(user.uin);
 
     // 添加映射
-    QZone.Common.FILE_URLS.set(avatarUrl, user.custom_avatar);
+    // QZone.Common.FILE_URLS.set(avatarUrl, user.custom_avatar);
 }
 
 /**

@@ -53,9 +53,12 @@ body {
 }
 
 .header {
-    top: 70px;
-    position: relative;
     text-align: center;
+}
+
+#index_html {
+    margin-top: 70px;
+    margin-bottom: 56px;
 }
 
 .head-info {

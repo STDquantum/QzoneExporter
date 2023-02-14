@@ -55,8 +55,11 @@ API.Statistics.getAllLbs = () => {
     // 获取所有说说的坐标
     const messageLbs = API.Messages.getAllLbs(messages);
     lbsItems.push(...messageLbs);
+    // 获取所有相册的坐标
+    const albumsLbs = API.Photos.getAllLbs(albums);
+    lbsItems.push(...albumsLbs);
 
-    return messageLbs;
+    return [...messageLbs, ...albumsLbs];
 }
 
 /**
@@ -74,7 +77,7 @@ API.Messages.getAllLbs = items => {
             continue;
         }
         // 转发的说说跳过
-        if(item.rt_tid){
+        if (item.rt_tid) {
             continue;
         }
         const lbs = item.lbs;
@@ -85,6 +88,30 @@ API.Messages.getAllLbs = items => {
         newLbs.module = '说说';
         newLbs.source = item;
         allLbs.push(newLbs);
+    }
+    return allLbs;
+}
+
+/**
+ * 获取照片的坐标位置
+ */
+API.Photos.getAllLbs = items => {
+    // 所有的坐标信息
+    const allLbs = [];
+
+    items = items || [];
+
+    for (const album of items) {
+        for (const photo of album.photoList) {
+            const lbs = photo.lbs;
+            if (!lbs || !lbs.pos_x || !lbs.pos_y) {
+                continue;
+            }
+            const newLbs = Object.assign({}, lbs);
+            newLbs.module = '相册';
+            newLbs.source = photo;
+            allLbs.push(newLbs);
+        }
     }
     return allLbs;
 }
@@ -371,35 +398,89 @@ API.Statistics.formatterResidentProvince = params => {
     contetns.push(`途径：<span class="text-primary">${params.name}</span><br>`);
     contetns.push(`足迹：<span class="text-primary">${params.value}</span>处<br>`);
 
+    const parseDate = function (time) {
+        if (!_.isNumber(time)) {
+            return new Date(time).getTime() / 1000;
+        }
+        return time;
+    }
+    const lengthLimit = 69;
+
     // 最早动态
-    const fisrtItem = _.minBy(params.data.items, item => item.source.created_time);
+    const fisrtItem = _.minBy(params.data.items, item => {
+        if (item.module === '说说') {
+            return item.source.created_time;
+        } else if (item.module === '相册') {
+            return parseDate((item.source.rawshoottime || item.source.shootTime) || (item.source.uploadtime || item.source.uploadTime))
+        }
+    });
 
     if (fisrtItem.module === '说说') {
         const message = fisrtItem.source;
-        const custom_content = API.Common.formatContent(message, "HTML", false, false);
+        var custom_content = API.Common.formatContent(message, "HTML", false, false);
+        if (custom_content.length > lengthLimit) custom_content = custom_content.slice(0, lengthLimit) + "..."
 
         contetns.push('<hr>');
         contetns.push(`最早打卡：<span class="text-primary">${message.custom_create_time}</span><br>`);
         if (!custom_content && message.rt_tid) {
-            contetns.push(`转发了说说：${API.Common.formatContent(message, "HTML", true, false)}<br>`);
+            var rt = API.Common.formatContent(message, "HTML", true, false);
+            if (rt.length > lengthLimit) rt = rt.slice(0, lengthLimit) + '...';
+            contetns.push(`转发了说说：${rt}<br>`);
         } else {
             contetns.push(`发表了说说：${custom_content}<br>`);
+        }
+    } else if (fisrtItem.module === '相册') {
+        const photo = fisrtItem.source;
+        var custom_content = API.Common.formatContent(photo.desc || photo.name, "HTML", false, false);
+        if (custom_content.length > lengthLimit) custom_content = custom_content.slice(0, lengthLimit) + "...";
+
+        contetns.push('<hr>');
+        contetns.push(`最早打卡：<span class="text-primary">${API.Utils.formatDate((photo.rawshoottime || photo.shootTime) || (photo.uploadtime || photo.uploadTime))}</span><br>`);
+        if (photo.is_video && photo.video_info) {
+            contetns.push(`上传了视频：${custom_content}<br>`);
+            contetns.push(`<img src="${API.Common.getMediaPath(photo.custom_url, photo.custom_pre_filepath, 'Photos_HTML')}" height="130px" />`)
+        } else {
+            contetns.push(`上传了照片：${custom_content}<br>`);
+            contetns.push(`<img src="${API.Common.getMediaPath(photo.custom_url, photo.custom_filepath, 'Photos_HTML')}" height="130px" />`)
         }
     }
 
     // 最新的动态
-    const latestItem = _.maxBy(params.data.items, item => item.source.created_time);
+    const latestItem = _.maxBy(params.data.items, item => {
+        if (item.module === '说说') {
+            return item.source.created_time;
+        } else if (item.module === '相册') {
+            return parseDate((item.source.rawshoottime || item.source.shootTime) || (item.source.uploadtime || item.source.uploadTime))
+        }
+    });
 
     if (latestItem.module === '说说') {
         const message = latestItem.source;
-        const custom_content = API.Common.formatContent(message, "HTML", false, false);
+        var custom_content = API.Common.formatContent(message, "HTML", false, false);
+        if (custom_content.length > lengthLimit) custom_content = custom_content.slice(0, lengthLimit) + "..."
 
         contetns.push('<hr>');
         contetns.push(`最新打卡：<span class="text-primary">${message.custom_create_time}</span><br>`);
         if (!custom_content && message.rt_tid) {
-            contetns.push(`转发了说说：${API.Common.formatContent(message, "HTML", true, false)}<br>`);
+            var rt = API.Common.formatContent(message, "HTML", true, false);
+            if (rt.length > lengthLimit) rt = rt.slice(0, lengthLimit) + '...';
+            contetns.push(`转发了说说：${rt}<br>`);
         } else {
             contetns.push(`发表了说说：${custom_content}<br>`);
+        }
+    } else if (latestItem.module === '相册') {
+        const photo = latestItem.source;
+        var custom_content = API.Common.formatContent(photo.desc || photo.name, "HTML", false, false);
+        if (custom_content.length > lengthLimit) custom_content = custom_content.slice(0, lengthLimit) + "...";
+
+        contetns.push('<hr>');
+        contetns.push(`最新打卡：<span class="text-primary">${API.Utils.formatDate((photo.rawshoottime || photo.shootTime) || (photo.uploadtime || photo.uploadTime))}</span><br>`);
+        if (photo.is_video && photo.video_info) {
+            contetns.push(`上传了视频：${custom_content}<br>`);
+            contetns.push(`<img src="${API.Common.getMediaPath(photo.custom_url, photo.custom_pre_filepath, 'Photos_HTML')}" height="130px" />`)
+        } else {
+            contetns.push(`上传了照片：${custom_content}<br>`);
+            contetns.push(`<img src="${API.Common.getMediaPath(photo.custom_url, photo.custom_filepath, 'Photos_HTML')}" height="130px" />`)
         }
     }
     return contetns.join('');
@@ -416,18 +497,37 @@ API.Statistics.formatterWayMarker = (params) => {
 
     // 显示内容
     const contetns = [];
-    contetns.push(`我的足迹：<span class="text-primary">${targetItem.idname || targetItem.name }</span><br>`);
+    contetns.push(`我的足迹：<span class="text-primary">${targetItem.idname || targetItem.name}</span><br>`);
+
+    const lengthLimit = 69;
 
     if (targetItem.module === '说说') {
         const message = targetItem.source;
-        const custom_content = API.Common.formatContent(message, "HTML", false, false);
+        var custom_content = API.Common.formatContent(message, "HTML", false, false);
+        if (custom_content.length > lengthLimit) custom_content = custom_content.slice(0, lengthLimit) + "..."
         contetns.push(`打卡时间：<span class="text-primary">${message.custom_create_time}</span><br>`);
 
         contetns.push('<hr>');
         if (!custom_content && message.rt_tid) {
-            contetns.push(`转发了说说：${API.Common.formatContent(message, "HTML", true, false)}<br>`);
+            var rt = API.Common.formatContent(message, "HTML", true, false);
+            if (rt.length > lengthLimit) rt = rt.slice(0, lengthLimit) + '...';
+            contetns.push(`转发了说说：${rt}<br>`);
         } else {
             contetns.push(`发表了说说：${custom_content}<br>`);
+        }
+    } else if (targetItem.module === '相册') {
+        const photo = targetItem.source;
+        var custom_content = API.Common.formatContent(photo.desc || photo.name, "HTML", false, false);
+        if (custom_content.length > lengthLimit) custom_content = custom_content.slice(0, lengthLimit) + "..."
+        contetns.push(`打卡时间：<span class="text-primary">${API.Utils.formatDate((photo.rawshoottime || photo.shootTime) || (photo.uploadtime || photo.uploadTime))}</span><br>`);
+
+        contetns.push('<hr>');
+        if (photo.is_video && photo.video_info) {
+            contetns.push(`上传了视频：${custom_content}<br>`);
+            contetns.push(`<img src="${API.Common.getMediaPath(photo.custom_url, photo.custom_pre_filepath, 'Photos_HTML')}" height="130px" />`)
+        } else {
+            contetns.push(`上传了照片：${custom_content}<br>`);
+            contetns.push(`<img src="${API.Common.getMediaPath(photo.custom_url, photo.custom_filepath, 'Photos_HTML')}" height="130px" />`)
         }
     }
 
@@ -472,11 +572,11 @@ API.Statistics.getTitleRegionName = (mapType) => {
  */
 API.Statistics.getTitle = (mapType, region, count) => {
     return [{
-        text: `QQ空间打卡足迹`,
-        link: 'https://qzone.qq.com',
-        subtext: userInfo.spacename,
+        /* text: `QQ空间备份-个人中心`,
+        link: '../index.html',
+        subtext: `${userInfo.name}的QQ空间`,
         sublink: `https://user.qzone.qq.com/${userInfo.uin}`,
-        left: 'left'
+        left: 'left' */
     }, {
         text: `{map|${MAP_TYPE_CFG.KEY_TO_NAME[mapType]}}那么大，才打卡{region|${region}}个${API.Statistics.getTitleRegionName(mapType)}，留下{count|${count}}处足迹`,
         textStyle: {
@@ -737,7 +837,7 @@ API.Statistics.initMap = (mapType) => {
                     show: true,
                     title: mapType === CHINA_MAP ? "切换到世界地图" : "切换到中国地图",
                     icon: "image://data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/PjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+PHN2ZyB0PSIxNjU0OTE4MzI5NDI4IiBjbGFzcz0iaWNvbiIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHAtaWQ9IjIzMjMiIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCI+PGRlZnM+PHN0eWxlIHR5cGU9InRleHQvY3NzIj48L3N0eWxlPjwvZGVmcz48cGF0aCBkPSJNMTAyMy45ODQwNCA1MTJjMCAyODIuNzQ5NTgyLTIyOS4yMTY0MTggNTEyLTUxMS45ODQgNTEyQzIyOS4yMzQ0NTggMTAyNCAwLjAwMDA0IDc5NC43NDk1ODIgMC4wMDAwNCA1MTIgMC4wMDAwNCAyMjkuMjM0NDE4IDIyOS4yMzQ0NTggMCA1MTIuMDAwMDQgMCA3OTQuNzY3NjIyIDAgMTAyMy45ODQwNCAyMjkuMjM0NDE4IDEwMjMuOTg0MDQgNTEyeiIgZmlsbD0iIzVEOUNFQyIgcC1pZD0iMjMyNCI+PC9wYXRoPjxwYXRoIGQ9Ik05OTguODkwNDMyIDM1My4yMDQ0ODFjLTI0LjAzMTYyNS03My42ODg4NDktNjUuNDA0OTc4LTE0Mi4xNzE3NzktMTE5LjcxODEyOS0xOTguMDQ2OTA1LTU0LjI0OTE1Mi01NS43ODExMjgtMTIxLjQzODEwMy05OS4wNzg0NTItMTk0LjI4MDk2NC0xMjUuMjE4MDQ0bC0yMS4yODE2NjgtNy42Mzk4OC02LjM3NTkgMjEuNzE3NjZjLTIuOTM3OTU0IDkuOTA3ODQ1LTUuMTU1OTE5IDE3LjA2MzczMy02LjY4OTg5NiAyMS4zNzU2NjYtMTguOTk5NzAzIDguOTA1ODYxLTM5LjMxMTM4NiAxNi45Mzc3MzUtNTguOTY3MDc4IDI0Ljc0OTYxNC02Mi43MTUwMiAyNC44NDE2MTItMTI3LjU0NDAwNyA1MC41NDUyMS0xNzIuMjYzMzA5IDEwOS40ODIyODktMTkuNDU1Njk2IDI1LjYyNTYtMjEuNzA1NjYxIDUyLjM5MTE4MS01Ljg1OTkwOCA2OS44Mjg5MDkgOC4yOTU4NyA5LjEzOTg1NyAyMC4zNzU2ODIgMTMuNzgxNzg1IDM1LjkwNTQzOSAxMy43ODE3ODQgMTAuMTIzODQyIDAgMjAuNjg3Njc3LTEuOTA1OTcgMjkuOTk5NTMxLTMuNTc3OTQ0IDYuNTYxODk3LTEuMTg3OTgxIDEzLjM0Mzc5Mi0yLjQwNTk2MiAxNy4zMjc3MjktMi40MDU5NjIgMC4yOTU5OTUgMCAwLjU2MTk5MSAwLjAxNiAwLjgyNzk4NyAwLjAzMTk5OSAyMi45MjE2NDIgMS42Mzk5NzQgNjUuNjI0OTc1IDkuNzQ5ODQ4IDEwMy44NzQzNzcgMTkuNzE3NjkyIDQyLjAzMTM0MyAxMC45Mzc4MjkgNjQuMzEyOTk1IDIwLjE4NzY4NSA3My44MTI4NDcgMjUuNTc5NjAxLTYuMzc1OSA3LjU5Mzg4MS0yMy40Njc2MzMgMTkuMzI5Njk4LTQ2LjM0NTI3NiAxOS4zMjk2OTgtMTEuMTg3ODI1IDAtMjIuMDYxNjU1LTIuODg5OTU1LTMyLjM3NTQ5NC04LjU3OTg2Ni0xNS43ODE3NTMtOC43MDM4NjQtNTUuMjgxMTM2LTE2Ljk2NzczNS0xMDkuNzE4Mjg2LTI2LjY4NzU4M2wtNS4yODE5MTctMC45NTM5ODVjLTIuMjgxOTY0LTAuNDA1OTk0LTQuODg5OTI0LTAuNjA5OTktNy45NTM4NzYtMC42MDk5OTEtMjIuODc1NjQzIDAtNzYuODI4OCAxMS4wNzc4MjctMTE3LjIxODE2OCA1My4wMzExNzItMzUuMzI3NDQ4IDM2LjY3MTQyNy01Mi4wNDUxODcgODcuMjE4NjM3LTQ5LjY4NzIyNCAxNTAuMjE3NjUyIDEuNDUzOTc3IDM4LjczMzM5NSAxNC41OTM3NzIgNzEuNjA4ODgxIDM4LjAxNTQwNiA5NS4wNDQ1MTUgMjMuNzY1NjI5IDIzLjgxMzYyOCA1Ni44NzUxMTEgMzYuNTk1NDI4IDk1LjczNDUwNCAzNy4wNjM0MjEgNC42MjM5MjggMC4wMzIgOS4yNjU4NTUgMC4wMzIgMTMuODc1NzgzIDAuMDMyaDMuMDkzOTUyYzIyLjQ1MzY0OSAwIDQ1LjY1NTI4NyAwIDYyLjgxMTAxOSA2LjQ2Nzg5OSAxMC45ODU4MjggNC4xMjM5MzYgMjQuNTE3NjE3IDEyLjI0OTgwOSAzMS44Mjk1MDIgMzguNjI1Mzk2IDcuNTYxODgyIDI3LjQzNzU3MSA5Ljc0OTg0OCA1NS40OTkxMzMgMTEuOTk5ODEzIDg1LjIxNjY2OSAyLjEyMzk2NyAyNy45Njc1NjMgNC4zNzU5MzIgNTYuOTA1MTExIDExLjQ5OTgyIDg1LjY1NDY2MSAxNC4xMjM3NzkgNTYuOTM5MTEgNDMuMjE3MzI1IDcxLjE1Njg4OCA2NS4xMjI5ODMgNzMuMDY0ODU5IDMuMTIzOTUxIDAuMjQ5OTk2IDYuMjQ5OTAyIDAuMzc1OTk0IDkuMzExODU0IDAuMzc1OTk0IDQ4Ljc1MTIzOCAwIDgxLjEyNDczMi0zMi44MTM0ODcgMTA3LjU5NDMxOS02My41OTUwMDcgNi4zMTE5MDEtNy4zNDU4ODUgMTMuMjE3NzkzLTE0LjQzOTc3NCAyMC41MzE2NzktMjEuOTM5NjU3IDE2LjEyNTc0OC0xNi41MzE3NDIgMzIuODEzNDg3LTMzLjYyMzQ3NSA0NC42ODkzMDItNTUuMzQzMTM1IDEzLjcxNzc4Ni0yNC45OTk2MDkgMTguNjIzNzA5LTUxLjI0OTE5OSAyMy40Mzc2MzQtNzYuNTkyODAzIDQuNDk5OTMtMjQuMDYxNjI0IDguODExODYyLTQ2Ljc4MzI2OSAyMC4yNDk2ODMtNjYuNjU2OTU5IDEuNTYxOTc2LTIuNjg3OTU4IDMuMzc1OTQ3LTUuNzQ5OTEgNS4zNzU5MTYtOS4yMTc4NTYgNTguMDk1MDkyLTk5LjYxMDQ0NCA3Mi4wNjI4NzQtMTM2LjQ4Mzg2NyA1OS43ODMwNjYtMTU3Ljg3MzUzMy01LjUzMTkxNC05LjU5Mzg1LTE1LjY1NTc1NS0xNC43ODE3NjktMjcuNDY5NTcxLTEzLjg3NTc4My01LjYyMzkxMiAwLjQzNzk5My0xMS4xODc4MjUgMC42NTU5OS0xNi40OTk3NDIgMC42NTU5OS0zNC45OTk0NTMgMC02My45MzcwMDEtOS42MjU4NS03OS40MDQ3NTktMjYuNDA3NTg4LTQuMzc1OTMyLTQuNzQ5OTI2LTYuNDY3ODk5LTguODQzODYyLTcuNDA1ODg0LTExLjU2MzgxOSAwLjUzMTk5Mi0wLjAzMiAxLjEyMzk4Mi0wLjA0NTk5OSAxLjgxMTk3MS0wLjA0NTk5OSAxMC4yNDk4NCAwIDI1Ljk5OTU5NCA0LjIwMzkzNCA0MS4yMTczNTYgOC4yODE4NyAxOC40MDU3MTIgNC45Mzc5MjMgMzcuNDY3NDE1IDEwLjAzMTg0MyA1NC4yMTcxNTMgMTAuMDMxODQzIDI3LjI4MzU3NCAwIDQ1LjAzMzI5Ni0xNC4xNzE3NzkgNDguOTM5MjM1LTM4Ljk4NTM5IDMuODc1OTM5LTcuMDMxODkgMjIuMDYxNjU1LTI0LjE3MTYyMiAzNC4zNzU0NjMtMjUuNzgxNTk4bDI1LjQ5OTYwMi0zLjMyNzk0OC03Ljk2Nzg3Ni0yNC40MzE2MTh6TTE2NC4yOTc0NzMgNjExLjc1MDQ0MWMtMTYuMDMzNzQ5LTIzLjMxMzYzNi0zNC4zOTE0NjMtNDUuODc1MjgzLTUwLjg3NTIwNS02OC44Mjg5MjQtMTUuMzU5NzYtMjEuNDA1NjY2LTc1LjMxMDgyMy0xMTguNzUwMTQ1LTEwMy4wOTQzODktMTMzLjcxNzkxMUE1MTQuNjIzOTU5IDUxNC42MjM5NTkgMCAwIDAgMC4wMDAwNCA1MTJjMCAxMjQuNjI0MDUzIDQ0LjUzMzMwNCAyMzguODEyMjY5IDExOC41MzIxNDggMzI3LjYyMjg4MSAwLjA2MTk5OSAwLjA2MTk5OSAwLjE3MTk5NyAwLjA5Mzk5OSAwLjMyNzk5NSAwLjA5Mzk5OCA0LjQ4MzkzIDAgNDYuMTg5Mjc4LTMwLjk5OTUxNiA0OS45NjkyMTktMzQuMjE3NDY1IDE2LjQyMTc0My0xMy45Mzc3ODIgMzAuMTcxNTI5LTMwLjk2NzUxNiAzNi4zMjc0MzItNTEuOTM3MTg4IDE0LjM1OTc3Ni00OC44MTEyMzctMTMuODU5NzgzLTEwMi41NjIzOTctNDAuODU5MzYxLTE0MS44MTE3ODV6IiBmaWxsPSIjQTBENDY4IiBwLWlkPSIyMzI1Ij48L3BhdGg+PC9zdmc+",
-                    onclick: function() {
+                    onclick: function () {
                         // 直接摧毁重建
                         chart.dispose();
                         API.Statistics.initMap(mapType === CHINA_MAP ? WORLD_MAP : CHINA_MAP);
@@ -772,7 +872,7 @@ API.Statistics.initMap = (mapType) => {
             label: {
                 normal: {
                     show: true,
-                    formatter: function(params) {
+                    formatter: function (params) {
                         if (mapType === WORLD_MAP && !SHOW_NAME_ON_WORLD.NAME_TO_KEY.hasOwnProperty(params.name)) {
                             return '';
                         }
@@ -781,7 +881,7 @@ API.Statistics.initMap = (mapType) => {
                 },
                 emphasis: {
                     show: true,
-                    formatter: function(params) {
+                    formatter: function (params) {
                         return params.name;
                     }
                 },
@@ -805,89 +905,89 @@ API.Statistics.initMap = (mapType) => {
             nameMap: API.Statistics.getNameMap(mapType)
         }],
         series: [{
-                type: 'scatter',
-                name: '打卡足迹',
-                coordinateSystem: 'geo',
-                geoIndex: 0,
-                symbol: "path://M832.179718 379.057175c0-176.277796-143.353942-319.077106-320.18023-319.077106-176.898943 0-320.18023 142.79931-320.18023 319.077106 0 212.71159 320.18023 584.961732 320.18023 584.961732S832.179718 591.768765 832.179718 379.057175zM378.580826 379.057175c0-73.443709 59.737546-132.942825 133.418662-132.942825 73.610508 0 133.421732 59.499116 133.421732 132.942825 0 73.364915-59.811224 132.942825-133.421732 132.942825C438.318372 512 378.580826 452.42209 378.580826 379.057175z",
-                symbolSize: 8,
-                color: "#007bff",
-                tooltip: {
-                    show: true,
-                    confine: true,
-                    formatter: API.Statistics.formatterWayMarker
-                },
-                data: geoItems
+            type: 'scatter',
+            name: '打卡足迹',
+            coordinateSystem: 'geo',
+            geoIndex: 0,
+            symbol: "path://M832.179718 379.057175c0-176.277796-143.353942-319.077106-320.18023-319.077106-176.898943 0-320.18023 142.79931-320.18023 319.077106 0 212.71159 320.18023 584.961732 320.18023 584.961732S832.179718 591.768765 832.179718 379.057175zM378.580826 379.057175c0-73.443709 59.737546-132.942825 133.418662-132.942825 73.610508 0 133.421732 59.499116 133.421732 132.942825 0 73.364915-59.811224 132.942825-133.421732 132.942825C438.318372 512 378.580826 452.42209 378.580826 379.057175z",
+            symbolSize: 8,
+            color: "#007bff",
+            tooltip: {
+                show: true,
+                confine: true,
+                formatter: API.Statistics.formatterWayMarker
             },
-            {
-                name: '途径省份',
-                type: 'map',
-                geoIndex: 0,
-                color: '#eee',
-                tooltip: {
-                    show: true,
-                    confine: true,
-                    formatter: API.Statistics.formatterResidentProvince
-                },
-                data: residentProvinceList
+            data: geoItems
+        },
+        {
+            name: '途径省份',
+            type: 'map',
+            geoIndex: 0,
+            color: '#eee',
+            tooltip: {
+                show: true,
+                confine: true,
+                formatter: API.Statistics.formatterResidentProvince
             },
-            {
-                // 五角星亮出首都
-                type: "scatter",
-                coordinateSystem: "geo",
-                zlevel: 2,
-                rippleEffect: {
-                    //涟漪特效
-                    period: 4,
-                    brushType: "stroke",
-                    scale: 4,
-                },
-                label: {
-                    normal: {
-                        show: false,
-                        position: "top",
+            data: residentProvinceList
+        },
+        {
+            // 五角星亮出首都
+            type: "scatter",
+            coordinateSystem: "geo",
+            zlevel: 2,
+            rippleEffect: {
+                //涟漪特效
+                period: 4,
+                brushType: "stroke",
+                scale: 4,
+            },
+            label: {
+                normal: {
+                    show: false,
+                    position: "top",
+                    color: "#0f0",
+                    formatter: "{b}",
+                    textStyle: {
                         color: "#0f0",
-                        formatter: "{b}",
-                        textStyle: {
-                            color: "#0f0",
-                        },
-                    },
-                    emphasis: {
-                        show: true,
-                        scale: true,
-                        color: "#f60",
                     },
                 },
-                symbol: "path://M908.1 353.1l-253.9-36.9L540.7 86.1c-3.1-6.3-8.2-11.4-14.5-14.5-15.8-7.8-35-1.3-42.9 14.5L369.8 316.2l-253.9 36.9c-7 1-13.4 4.3-18.3 9.3-12.3 12.7-12.1 32.9 0.6 45.3l183.7 179.1-43.4 252.9c-1.2 6.9-0.1 14.1 3.2 20.3 8.2 15.6 27.6 21.7 43.2 13.4L512 754l227.1 119.4c6.2 3.3 13.4 4.4 20.3 3.2 17.4-3 29.1-19.5 26.1-36.9l-43.4-252.9 183.7-179.1c5-4.9 8.3-11.3 9.3-18.3 2.7-17.5-9.5-33.7-27-36.3z", //图片
-                symbolSize: 10,
-                symbolOffset: [0, "-50%"],
-                color: "red",
-                tooltip: {
+                emphasis: {
                     show: true,
-                    formatter: "大{b}，还是得去一趟"
+                    scale: true,
+                    color: "#f60",
                 },
-                data: [{
-                    name: "首都",
-                    value: [116.405285, 39.904989]
-                }]
-            }
+            },
+            symbol: "path://M908.1 353.1l-253.9-36.9L540.7 86.1c-3.1-6.3-8.2-11.4-14.5-14.5-15.8-7.8-35-1.3-42.9 14.5L369.8 316.2l-253.9 36.9c-7 1-13.4 4.3-18.3 9.3-12.3 12.7-12.1 32.9 0.6 45.3l183.7 179.1-43.4 252.9c-1.2 6.9-0.1 14.1 3.2 20.3 8.2 15.6 27.6 21.7 43.2 13.4L512 754l227.1 119.4c6.2 3.3 13.4 4.4 20.3 3.2 17.4-3 29.1-19.5 26.1-36.9l-43.4-252.9 183.7-179.1c5-4.9 8.3-11.3 9.3-18.3 2.7-17.5-9.5-33.7-27-36.3z", //图片
+            symbolSize: 10,
+            symbolOffset: [0, "-50%"],
+            color: "red",
+            tooltip: {
+                show: true,
+                formatter: "大{b}，还是得去一趟"
+            },
+            data: [{
+                name: "首都",
+                value: [116.405285, 39.904989]
+            }]
+        }
         ]
     };
     chart.setOption(option);
 
     // 鼠标点击
-    chart.on('click', function(params) {
+    chart.on('click', function (params) {
         console.debug("鼠标点击", params);
     });
 
-    chart.on('selectchanged', function(params) {
+    chart.on('selectchanged', function (params) {
         console.debug("选中事件", params);
     });
 
     return chart;
 }
 
-$(function() {
+$(function () {
     // 初始化中国地图
     API.Statistics.initMap(CHINA_MAP);
 });

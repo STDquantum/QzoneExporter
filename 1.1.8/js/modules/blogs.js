@@ -573,6 +573,8 @@ API.Blogs.handerContentImages = async(item, images) => {
         $img.attr('src', url);
         // 更改图片索引
         $img.attr('data-idx', i);
+        // 修改图片样式
+        $img.attr('style', "border:0;background-image:url(../Common/images/loading.gif);background-repeat:no-repeat;background-position:center center;")
 
         // 图片上层的超链接
         const $imageLink = $img.parent('a');

@@ -193,7 +193,7 @@ API.Friends.isNewItem = (item) => {
     if (!QZone_Config.Friends.isIncrement) {
         return true;
     }
-    return API.Common.isNewItem(item) || QZone.Friends.OLD_Data.getIndex(item.uin, 'uin') == -1;
+    return API.Common.isNewItem(item) && QZone.Friends.OLD_Data.getIndex(item.uin, 'uin') == -1;
 }
 
 /**

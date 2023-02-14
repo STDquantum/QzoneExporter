@@ -2,37 +2,38 @@
 <html lang="zh">
 
 <head>
-	<link rel="icon" href="https://qzonestyle.gtimg.cn/aoi/img/logo/favicon.ico">
+	<link rel="icon" href="../Local/ico/favicon.ico">
 	<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 	<title>QQ空间备份-收藏夹</title>
-	<link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/4.7.0/css/font-awesome.min.css">
-	<link rel="stylesheet" href="https://cdn.staticfile.org/bootstrap/4.6.1/css/bootstrap.min.css">
+	<link rel="stylesheet" href="../Local/css/font-awesome.min.css">
+	<link rel="stylesheet" href="../Local/css/bootstrap.min.css">
 	
-	<link rel="stylesheet" href="https://cdn.staticfile.org/lightgallery/2.3.0/css/lightgallery.min.css">
-	<link rel="stylesheet" href="https://cdn.staticfile.org/lightgallery/2.3.0/css/lightgallery-bundle.min.css">
+	<link rel="stylesheet" href="../Local/css/lightgallery.min.css">
+	<link rel="stylesheet" href="../Local/css/lightgallery-bundle.min.css">
 	
 	<link rel="stylesheet" type="text/css" href="../Common/css/common.css">
-	<script src="https://cdn.staticfile.org/jquery/3.6.0/jquery.min.js"></script>
-	<script src="https://cdn.staticfile.org/jquery-mousewheel/3.1.13/jquery.mousewheel.min.js"></script>
-	<script src="https://cdn.staticfile.org/bootstrap/4.6.1/js/bootstrap.bundle.min.js"></script>
-	<script src="https://cdn.staticfile.org/lodash.js/4.17.21/lodash.min.js"></script>
+	<script src="../Local/js/jquery.min.js"></script>
+	<script src="../Local/js/jquery.mousewheel.min.js"></script>
+	<script src="../Local/js/bootstrap.bundle.min.js"></script>
+	<script src="../Local/js/lodash.min.js"></script>
 	
-	<script src="https://cdn.staticfile.org/lightgallery/2.3.0/lightgallery.min.js"></script>
-	<script src="https://cdn.staticfile.org/lightgallery/2.3.0/plugins/zoom/lg-zoom.min.js"></script>
-	<script src="https://cdn.staticfile.org/lightgallery/2.3.0/plugins/video/lg-video.min.js"></script>
-	<script src="https://cdn.staticfile.org/lightgallery/2.3.0/plugins/thumbnail/lg-thumbnail.min.js"></script>
-	<script src="https://cdn.staticfile.org/lightgallery/2.3.0/plugins/rotate/lg-rotate.min.js"></script>
-	<script src="https://cdn.staticfile.org/lightgallery/2.3.0/plugins/fullscreen/lg-fullscreen.min.js"></script>
-	<script src="https://cdn.staticfile.org/lightgallery/2.3.0/plugins/autoplay/lg-autoplay.min.js"></script>
+	<script src="../Local/js/lightgallery.min.js"></script>
+	<script src="../Local/js/lg-zoom.min.js"></script>
+	<script src="../Local/js/lg-video.min.js"></script>
+	<script src="../Local/js/lg-thumbnail.min.js"></script>
+	<script src="../Local/js/lg-rotate.min.js"></script>
+	<script src="../Local/js/lg-fullscreen.min.js"></script>
+	<script src="../Local/js/lg-autoplay.min.js"></script>
 
-	<script src="https://cdn.staticfile.org/jquery_lazyload/2.0.0-rc.2/lazyload.min.js"></script>
-	<script src="https://fastly.jsdelivr.net/npm/template_js@2.2.1/dist/index.aio.min.js" integrity="sha256-gnK+GsIXEBgu/mJouMDtUxXvXM3M0jzxNYmjnlsifgY=" crossorigin="anonymous"></script>
-	<script src="https://www.lvshuncai.com/custom/js/clicklove.min.js"></script>
+	<script src="../Local/js/lazyload.min.js"></script>
+	<script src="https://fastly.jsdelivr.net/npm/template_js@2.2.1/dist/index.aio.min.js""></script>
 
 	<script type="text/javascript" src="../Common/js/common.js"></script>
 	<script type="text/javascript" src="../Common/js/sidebar.js"></script>
 	<script type="text/javascript" src="json/favorites.js"></script>
 	<script type="text/javascript" src="js/favorites.js"></script>
+
+	<script src="../local/js/avatarDict.js"></script>
 </head>
 
 <body>
@@ -128,36 +129,36 @@
 											</div>
 											<div class="col text-white text-truncate">
 												<%if(favorite.shuoshuo_info && favorite.shuoshuo_info.reason && favorite.shuoshuo_info.reason.trim() !== ''){%>
-													<pre class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.shuoshuo_info.reason,'HTML', false, true)%>"><%:=API.Common.formatContent(favorite.shuoshuo_info.reason,'HTML', false, true)%></pre>
+													<p class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.shuoshuo_info.reason,'HTML', false, true)%>"><%:=API.Common.formatContent(favorite.shuoshuo_info.reason,'HTML', false, true)%></p>
 												<%}%>
 												<%if(favorite.share_info && favorite.share_info.reason && favorite.share_info.reason.trim() !== ''){%>
-													<pre class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.share_info.reason,'HTML', false, true)%>"><%:=API.Common.formatContent(favorite.share_info.reason,'HTML', false, true)%></pre>
+													<p class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.share_info.reason,'HTML', false, true)%>"><%:=API.Common.formatContent(favorite.share_info.reason,'HTML', false, true)%></p>
 												<%}%>
 												<%if(favorite.type === 5){%>
 													<%/* 说说 */%>
 													<%if(favorite.shuoshuo_info && favorite.shuoshuo_info.detail_shuoshuo_info && favorite.shuoshuo_info.detail_shuoshuo_info.content){%>
-														<pre class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.shuoshuo_info.detail_shuoshuo_info.content,'HTML', false, false)%>"><%:=API.Common.formatContent(favorite.shuoshuo_info.detail_shuoshuo_info.content,'HTML', false, false)%></pre>
+														<p class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.shuoshuo_info.detail_shuoshuo_info.content,'HTML', false, false)%>"><%:=API.Common.formatContent(favorite.shuoshuo_info.detail_shuoshuo_info.content,'HTML', false, false)%></p>
 													<%}else{%>
-														<pre class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, false)%>"><%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, false)%></pre>
+														<p class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, false)%>"><%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, false)%></p>
 													<%}%>
 												<%}else if(favorite.type === 7){%>
 													<%/* 分享 */%>
 													<%if(favorite.title && favorite.title.trim() !== ''){%>
-														<pre class="text-white" data-toggle="tooltip" data-html="true"><a target="_blank" href="<%:=API.Favorites.getShareUrl(favorite.share_info)%>"><%:=favorite.title%></a></pre>
+														<p class="text-white" data-toggle="tooltip" data-html="true"><a target="_blank" href="<%:=API.Favorites.getShareUrl(favorite.share_info)%>"><%:=favorite.title%></a></p>
 													<%}%>
 													<%if(favorite.abstract && favorite.abstract.trim() !== ''){%>
-														<pre class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, true)%>"><%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, true)%></pre>
+														<p class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, true)%>"><%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, true)%></p>
 													<%}%>
 												<%}else if(favorite.type === 3){%>
 													<%/* 日志 */%>
 													<%if(favorite.title){%>
-														<pre class="text-white" data-toggle="tooltip" data-html="true" title="<%:=favorite.title%>"><a target="_blank" href="http://user.qzone.qq.com/<%:=favorite.blog_info.owner_uin%>/blog/<%:=favorite.blog_info.id%>"><%:=favorite.title%></a></pre>
+														<p class="text-white" data-toggle="tooltip" data-html="true" title="<%:=favorite.title%>"><a target="_blank" href="http://user.qzone.qq.com/<%:=favorite.blog_info.owner_uin%>/blog/<%:=favorite.blog_info.id%>"><%:=favorite.title%></a></p>
 													<%}%>
 													<%if(favorite.abstract && favorite.abstract.trim() !== ''){%>
-														<pre class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.abstract,'HTML', false, true)%>"><%:=API.Common.formatContent(favorite.abstract,'HTML', false, true)%></pre>
+														<p class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.abstract,'HTML', false, true)%>"><%:=API.Common.formatContent(favorite.abstract,'HTML', false, true)%></p>
 													<%}%>
 												<%}else{%>
-													<pre class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, true)%>"><%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, true)%></pre>
+													<p class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, true)%>"><%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, true)%></p>
 												<%}%>
 											</div>
 											<div class="col"></div>
