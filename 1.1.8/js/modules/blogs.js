@@ -519,6 +519,9 @@ API.Blogs.handerListImages = async(items) => {
         return;
     }
     for (const item of items) {
+        if (!API.Common.isNewItem(item)) {
+            return;
+        }
         const images = item.img || [];
         for (const image of images) {
             // 图片地址
