@@ -48,7 +48,8 @@ if __name__ == "__main__":
     avatarDict = "avatarDict = {"
     for url in data:
         if url.endswith("100"): # 说明这个文件是一个头像
-            uid = re.search(r".store.qq.com/qzone/(\d+)", url)
+            uid = re.search(r".store.qq.com/qzone/(\d+)", url).group()
+            uid = uid.replace(".store.qq.com/qzone/", "")
             avatarDict += f'\n    "{uid}": "../Local/avatar/{uid}.{data[url].split(".")[1]}",'
     avatarDict = avatarDict[:-1]
     avatarDict += "\n}"
