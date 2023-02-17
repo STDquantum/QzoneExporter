@@ -11,7 +11,7 @@ def mkdir(p):
 
 def process(html, pre):
     s = open(html, "r", encoding = "utf-8").read()
-    p = re.compile('(?<=")https://(?:c|q).*?(?=")')
+    p = re.compile('(?<=")https://(?:c|q|f).*?(?=")')
     l = list(set(p.findall(s)))
     mkdir("Local")
     for i in l:
