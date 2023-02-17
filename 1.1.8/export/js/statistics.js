@@ -36,6 +36,22 @@ const CHINA_MAP = "china";
 // 世界地图
 const WORLD_MAP = "world";
 
+// 把时间变为以秒计算的时间戳
+const parseDate = function (time) {
+    if (!_.isNumber(time)) {
+        return new Date(time).getTime() / 1000;
+    }
+    return time;
+};
+
+const getItemTime = function (item) {
+    if (item.module === '说说') {
+        return item.source.created_time;
+    } else if (item.module === '相册') {
+        return parseDate((item.source.rawshoottime || item.source.shootTime) || (item.source.uploadtime || item.source.uploadTime))
+    }
+};
+
 /**
  * 获取地图名称映射
  * @param {String} mapType 地图类型
@@ -59,7 +75,7 @@ API.Statistics.getAllLbs = () => {
     const albumsLbs = API.Photos.getAllLbs(albums);
     lbsItems.push(...albumsLbs);
 
-    return [...messageLbs, ...albumsLbs];
+    return [...messageLbs, ...albumsLbs].sort((a, b) => getItemTime(b) - getItemTime(a));
 }
 
 /**
@@ -369,7 +385,13 @@ API.Statistics.rayCasting = (p, poly) => {
  */
 API.Statistics.toGeoCoord = items => {
     const res = [];
+    // 保证最新时间的item进res就可以了，坐标重叠了下面的用不着加载
+    const geoCoords = [];
     for (const item of items) {
+        if (geoCoords.some(a => a.x == item.pos_x && a.y == item.pos_y)) {
+            continue;
+        }
+        geoCoords.push({ x: item.pos_x, y: item.pos_y });
         res.push({
             name: item.name || item.idname,
             value: [item.pos_x, item.pos_y],
@@ -398,22 +420,10 @@ API.Statistics.formatterResidentProvince = params => {
     contetns.push(`途径：<span class="text-primary">${params.name}</span><br>`);
     contetns.push(`足迹：<span class="text-primary">${params.value}</span>处<br>`);
 
-    const parseDate = function (time) {
-        if (!_.isNumber(time)) {
-            return new Date(time).getTime() / 1000;
-        }
-        return time;
-    }
     const lengthLimit = 69;
 
     // 最早动态
-    const fisrtItem = _.minBy(params.data.items, item => {
-        if (item.module === '说说') {
-            return item.source.created_time;
-        } else if (item.module === '相册') {
-            return parseDate((item.source.rawshoottime || item.source.shootTime) || (item.source.uploadtime || item.source.uploadTime))
-        }
-    });
+    const fisrtItem = _.minBy(params.data.items, getItemTime);
 
     if (fisrtItem.module === '说说') {
         const message = fisrtItem.source;
@@ -446,13 +456,7 @@ API.Statistics.formatterResidentProvince = params => {
     }
 
     // 最新的动态
-    const latestItem = _.maxBy(params.data.items, item => {
-        if (item.module === '说说') {
-            return item.source.created_time;
-        } else if (item.module === '相册') {
-            return parseDate((item.source.rawshoottime || item.source.shootTime) || (item.source.uploadtime || item.source.uploadTime))
-        }
-    });
+    const latestItem = _.maxBy(params.data.items, getItemTime);
 
     if (latestItem.module === '说说') {
         const message = latestItem.source;
