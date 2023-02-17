@@ -17,6 +17,7 @@ if __name__ == "__main__":
         exit(0)
 
     data = {}
+    change = {}
     ran = ["Messages", "Shares", "Blogs", "Friends", "Albums", "Boards", "Diaries", "Favorites", "Videos", "Visitors"]
     for part in ran:
         s = open(get(f"{part}\\json\\{part.lower()}.js"), "r", encoding = "utf-8").read()
@@ -26,8 +27,22 @@ if __name__ == "__main__":
             if logoUrl in data: continue
             res = requests.get(logoUrl)
             data[logoUrl] = f'Local/avatar/{uin}.{res.headers["Content-Type"].split("/")[-1]}'
+            if uin in oldAvatarDict and "../" + data[logoUrl] != oldAvatarDict[uin]:
+                change[oldAvatarDict[uin]] = "../" + data[logoUrl]
             open(get(data[logoUrl]), "wb").write(res.content)
             print(logoUrl)
+
+    for dirname, a, files in os.walk(get('.')):
+        for file in files:
+            if not file.endswith(".html"): continue
+            print(os.path.join(dirname, file))
+            s = open(os.path.join(dirname, file), "r", encoding = "utf-8").read()
+            l = list(set(re.findall(r'(?<=")../Local/avatar/.*?(?=")', s)))
+            for i in l:
+                if i not in change: continue
+                s = s.replace(i, change[i])
+                print(i, "->", change[i])
+            open(os.path.join(dirname, file), "w", encoding = "utf-8").write(s)
 
 
     avatarDict = "avatarDict = {"
