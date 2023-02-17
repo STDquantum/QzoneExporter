@@ -1,4 +1,4 @@
-$(function() {
+$(function () {
 
     // 获取相册ID
     albumId = albumId !== '<%:=(albumId)%>' ? albumId : API.Utils.getUrlParam('albumId');
@@ -12,6 +12,14 @@ $(function() {
     // 非静态页面，需要生成相片列表，静态页面默认生成
     // 获取模板元素
     const photos_tpl = document.getElementById('photos_tpl').innerHTML;
+    // 对相册采取按拍摄时间排序的手段，一般都是大批量上传原图，按照上传时间拍没有意义
+    const parseDate = function (time) {
+        if (!_.isNumber(time)) {
+            return new Date(time).getTime() / 1000;
+        }
+        return time;
+    }
+    album.photoList.sort((a, b) => parseDate((b.rawshoottime || b.shootTime) || (b.uploadtime || b.uploadTime)) - parseDate((a.rawshoottime || a.shootTime) || (a.uploadtime || a.uploadTime)));
     // 生成模板
     const photos_html = template(photos_tpl, { album: album || {} });
     // 渲染模板到页面
@@ -54,12 +62,12 @@ $(function() {
     $gallery.galleryIns = galleryIns;
 
     // 查看赞
-    $('.viewlikes').on('click', function() {
+    $('.viewlikes').on('click', function () {
         API.Common.showLikeWin(this, album.photoList);
     });
 
     // 查看评论
-    $('.viewcomments').on('click', function() {
+    $('.viewcomments').on('click', function () {
         API.Common.showCommentsWin(this, album.photoList);
     });
 
