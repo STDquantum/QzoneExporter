@@ -402,6 +402,43 @@ API.Statistics.toGeoCoord = items => {
 }
 
 
+/**
+ * 获得内容 
+ * @param {Array} contents 
+ * @param {Number} lengthLimit 
+ * @param {Object} item
+ * @param {String} type 最新打卡或最早打卡或打卡时间
+ */
+const getContent = function (contents, lengthLimit, item, type) {
+    if (item.module === '说说') {
+        const message = item.source;
+        const custom_content = API.Common.formatContent(message, "HTML", false, false, false, false, true).slice(0, lengthLimit);
+
+        contents.push('<hr>');
+        contents.push(`${type}：<span class="text-primary">${message.custom_create_time}</span><br>`);
+        if (!custom_content && message.rt_tid) {
+            contents.push(`转发了说说：${API.Common.formatContent(message, "HTML", true, false, false, false, true).slice(0, lengthLimit)}<br>`);
+        } else {
+            contents.push(`发表了说说：${custom_content}<br>`);
+        }
+    } else if (item.module === '相册') {
+        const photo = item.source;
+        const custom_content = API.Common.formatContent(photo.desc || photo.name || '', 'MD', false, false, false, false, true).slice(0, lengthLimit);
+
+        contents.push('<hr>');
+        contents.push(`${type}：<span class="text-primary">${API.Utils.formatDate((photo.rawshoottime || photo.shootTime) || (photo.uploadtime || photo.uploadTime))}</span><br>`);
+        if (photo.is_video && photo.video_info) {
+            contents.push(`上传了视频：${custom_content}<br>`);
+            contents.push(`<img src="${API.Common.getMediaPath(photo.custom_url, photo.custom_pre_filepath, 'Photos_HTML')}" height="130px" />`)
+        } else {
+            contents.push(`上传了照片：${custom_content}<br>`);
+            contents.push(`<img src="${API.Common.getMediaPath(photo.custom_url, photo.custom_filepath, 'Photos_HTML')}" height="130px" />`)
+        }
+    }
+}
+
+const lengthLimit = 69;
+
 
 /**
  * 格式化途径省份提示内容
@@ -420,73 +457,14 @@ API.Statistics.formatterResidentProvince = params => {
     contetns.push(`途径：<span class="text-primary">${params.name}</span><br>`);
     contetns.push(`足迹：<span class="text-primary">${params.value}</span>处<br>`);
 
-    const lengthLimit = 69;
-
     // 最早动态
     const fisrtItem = _.minBy(params.data.items, getItemTime);
-
-    if (fisrtItem.module === '说说') {
-        const message = fisrtItem.source;
-        var custom_content = API.Common.formatContent(message, "HTML", false, false);
-        if (custom_content.length > lengthLimit) custom_content = custom_content.slice(0, lengthLimit) + "..."
-
-        contetns.push('<hr>');
-        contetns.push(`最早打卡：<span class="text-primary">${message.custom_create_time}</span><br>`);
-        if (!custom_content && message.rt_tid) {
-            var rt = API.Common.formatContent(message, "HTML", true, false);
-            if (rt.length > lengthLimit) rt = rt.slice(0, lengthLimit) + '...';
-            contetns.push(`转发了说说：${rt}<br>`);
-        } else {
-            contetns.push(`发表了说说：${custom_content}<br>`);
-        }
-    } else if (fisrtItem.module === '相册') {
-        const photo = fisrtItem.source;
-        var custom_content = API.Common.formatContent(photo.desc || photo.name, "HTML", false, false);
-        if (custom_content.length > lengthLimit) custom_content = custom_content.slice(0, lengthLimit) + "...";
-
-        contetns.push('<hr>');
-        contetns.push(`最早打卡：<span class="text-primary">${API.Utils.formatDate((photo.rawshoottime || photo.shootTime) || (photo.uploadtime || photo.uploadTime))}</span><br>`);
-        if (photo.is_video && photo.video_info) {
-            contetns.push(`上传了视频：${custom_content}<br>`);
-            contetns.push(`<img src="${API.Common.getMediaPath(photo.custom_url, photo.custom_pre_filepath, 'Photos_HTML')}" height="130px" />`)
-        } else {
-            contetns.push(`上传了照片：${custom_content}<br>`);
-            contetns.push(`<img src="${API.Common.getMediaPath(photo.custom_url, photo.custom_filepath, 'Photos_HTML')}" height="130px" />`)
-        }
-    }
+    getContent(contetns, lengthLimit, fisrtItem, "最早打卡");
 
     // 最新的动态
     const latestItem = _.maxBy(params.data.items, getItemTime);
+    getContent(contetns, lengthLimit, latestItem, "最新打卡")
 
-    if (latestItem.module === '说说') {
-        const message = latestItem.source;
-        var custom_content = API.Common.formatContent(message, "HTML", false, false);
-        if (custom_content.length > lengthLimit) custom_content = custom_content.slice(0, lengthLimit) + "..."
-
-        contetns.push('<hr>');
-        contetns.push(`最新打卡：<span class="text-primary">${message.custom_create_time}</span><br>`);
-        if (!custom_content && message.rt_tid) {
-            var rt = API.Common.formatContent(message, "HTML", true, false);
-            if (rt.length > lengthLimit) rt = rt.slice(0, lengthLimit) + '...';
-            contetns.push(`转发了说说：${rt}<br>`);
-        } else {
-            contetns.push(`发表了说说：${custom_content}<br>`);
-        }
-    } else if (latestItem.module === '相册') {
-        const photo = latestItem.source;
-        var custom_content = API.Common.formatContent(photo.desc || photo.name, "HTML", false, false);
-        if (custom_content.length > lengthLimit) custom_content = custom_content.slice(0, lengthLimit) + "...";
-
-        contetns.push('<hr>');
-        contetns.push(`最新打卡：<span class="text-primary">${API.Utils.formatDate((photo.rawshoottime || photo.shootTime) || (photo.uploadtime || photo.uploadTime))}</span><br>`);
-        if (photo.is_video && photo.video_info) {
-            contetns.push(`上传了视频：${custom_content}<br>`);
-            contetns.push(`<img src="${API.Common.getMediaPath(photo.custom_url, photo.custom_pre_filepath, 'Photos_HTML')}" height="130px" />`)
-        } else {
-            contetns.push(`上传了照片：${custom_content}<br>`);
-            contetns.push(`<img src="${API.Common.getMediaPath(photo.custom_url, photo.custom_filepath, 'Photos_HTML')}" height="130px" />`)
-        }
-    }
     return contetns.join('');
 }
 
@@ -502,38 +480,7 @@ API.Statistics.formatterWayMarker = (params) => {
     // 显示内容
     const contetns = [];
     contetns.push(`我的足迹：<span class="text-primary">${targetItem.idname || targetItem.name}</span><br>`);
-
-    const lengthLimit = 69;
-
-    if (targetItem.module === '说说') {
-        const message = targetItem.source;
-        var custom_content = API.Common.formatContent(message, "HTML", false, false);
-        if (custom_content.length > lengthLimit) custom_content = custom_content.slice(0, lengthLimit) + "..."
-        contetns.push(`打卡时间：<span class="text-primary">${message.custom_create_time}</span><br>`);
-
-        contetns.push('<hr>');
-        if (!custom_content && message.rt_tid) {
-            var rt = API.Common.formatContent(message, "HTML", true, false);
-            if (rt.length > lengthLimit) rt = rt.slice(0, lengthLimit) + '...';
-            contetns.push(`转发了说说：${rt}<br>`);
-        } else {
-            contetns.push(`发表了说说：${custom_content}<br>`);
-        }
-    } else if (targetItem.module === '相册') {
-        const photo = targetItem.source;
-        var custom_content = API.Common.formatContent(photo.desc || photo.name, "HTML", false, false);
-        if (custom_content.length > lengthLimit) custom_content = custom_content.slice(0, lengthLimit) + "..."
-        contetns.push(`打卡时间：<span class="text-primary">${API.Utils.formatDate((photo.rawshoottime || photo.shootTime) || (photo.uploadtime || photo.uploadTime))}</span><br>`);
-
-        contetns.push('<hr>');
-        if (photo.is_video && photo.video_info) {
-            contetns.push(`上传了视频：${custom_content}<br>`);
-            contetns.push(`<img src="${API.Common.getMediaPath(photo.custom_url, photo.custom_pre_filepath, 'Photos_HTML')}" height="130px" />`)
-        } else {
-            contetns.push(`上传了照片：${custom_content}<br>`);
-            contetns.push(`<img src="${API.Common.getMediaPath(photo.custom_url, photo.custom_filepath, 'Photos_HTML')}" height="130px" />`)
-        }
-    }
+    getContent(contetns, lengthLimit, targetItem, "打卡时间");
 
     return contetns.join('');
 }
@@ -615,122 +562,6 @@ API.Statistics.getTitle = (mapType, region, count) => {
         left: 'center',
         bottom: "0"
     }]
-}
-
-/**
- * 获取评论人
- * @param {Object} item 
- */
-API.Statistics.getCommentUsers = (item) => {
-    // 评论人
-    const users = [];
-
-    // 说说评论人
-    const comments = item.custom_comments || [];
-    if (_.isEmpty(comments)) {
-        return users;
-    }
-    // 遍历评论
-    for (const comment of comments) {
-        if (_.findIndex(users, ['uin', comment.uin]) > -1) {
-            continue;
-        }
-        users.push({
-            uin: comment.uin || comment.fuin,
-            name: comment.name || comment.nick
-        });
-
-        // 回复
-        const repList = comment.list_3 || [];
-        for (const repItem of repList) {
-            if (_.findIndex(users, ['uin', repItem.uin]) > -1) {
-                continue;
-            }
-            users.push({
-                uin: repItem.uin || repItem.fuin,
-                name: repItem.name || repItem.nick
-            });
-        }
-    }
-    return users;
-}
-
-/**
- * 获取点赞人
- * @param {Object} item 
- */
-API.Statistics.getLikeUsers = (item) => {
-    // 评论人
-    const users = [];
-
-    // 说说点赞人
-    const likes = item.likes || [];
-
-    if (_.isEmpty(likes)) {
-        return users;
-    }
-    // 遍历点赞
-    for (const like of likes) {
-        if (_.findIndex(users, ['uin', like.fuin]) > -1) {
-            continue;
-        }
-
-        users.push({
-            uin: like.uin || like.fuin,
-            name: like.name || like.nick
-        });
-    }
-    return users;
-}
-
-/**
- * 获取浏览者
- * @param {Object} item 
- */
-API.Statistics.getVisitorUsers = (item) => {
-    // 评论人
-    const users = [];
-
-    // 说说访客
-    const custom_visitors = item.custom_visitor.list || [];
-    if (_.isEmpty(custom_visitors)) {
-        return users;
-    }
-    // 遍历点赞
-    for (const visitorItem of custom_visitors) {
-        if (_.findIndex(users, ['uin', visitorItem.uin]) > -1) {
-            continue;
-        }
-
-        users.push({
-            uin: visitorItem.uin || visitorItem.fuin,
-            name: visitorItem.name || visitorItem.nick
-        });
-    }
-
-    return users;
-}
-
-/**
- * 收集说说互动用户
- */
-API.Statistics.getMessagesInteractiveUsers = () => {
-    //  所有的用户
-    const users = [];
-
-    if (_.isEmpty(messages)) {
-        return users;
-    }
-
-    for (const item of messages) {
-        // 说说评论人
-        users.push(...API.Statistics.getCommentUsers(item));
-        // 说说点赞人
-        users.push(...API.Statistics.getLikeUsers(item));
-        // 说说访客
-        users.push(...API.Statistics.getVisitorUsers(item));
-    }
-    return _.uniqBy(users, 'uin');
 }
 
 /**
