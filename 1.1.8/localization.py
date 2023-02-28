@@ -43,7 +43,3 @@ if __name__ == "__main__":
     for dirpath, dirnames, filenames in os.walk(get("html")):
         for file in filenames:
             process(os.path.join(dirpath, file), "../")
-
-    for dirpath, dirnames, filenames in os.walk(get("templates")):
-        for file in filenames:
-            process(os.path.join(dirpath, file), "../")
