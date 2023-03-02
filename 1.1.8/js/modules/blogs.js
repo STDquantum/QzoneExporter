@@ -180,7 +180,7 @@ API.Blogs.getAllList = async() => {
         return await API.Blogs.getList(pageIndex, indicator).then(async(dataList) => {
 
             // 设置比较信息
-            // dataList = API.Common.setCompareFiledInfo(dataList, 'pubTime', 'pubtime');
+            dataList = API.Common.setCompareFiledInfo(dataList, 'pubTime', 'pubtime');
 
             // 合并数据
             QZone.Blogs.Data = API.Utils.unionItems(QZone.Blogs.Data, dataList);

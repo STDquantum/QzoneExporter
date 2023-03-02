@@ -119,7 +119,7 @@ API.Photos.getAllLbs = items => {
 
     for (const album of items) {
         for (const photo of album.photoList) {
-            const lbs = API.Photos.getPhotoLbs(photo);
+            const lbs = photo.custom_lbs;
             if (!lbs || !lbs.pos_x || !lbs.pos_y) {
                 continue;
             }
