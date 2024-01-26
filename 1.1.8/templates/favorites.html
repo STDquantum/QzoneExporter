@@ -187,9 +187,9 @@
 										<%}%>
 									<%}%>
 									<%/* 图片内容 */%>
-									<%if(favorite.custom_origin_images || favorite.custom_images){%>
+									<%if(favorite.custom_images || favorite.custom_origin_images){%>
 										<%let imgIdex = 0%>
-										<%let favImages = favorite.custom_origin_images || favorite.custom_images%>
+										<%let favImages = favorite.custom_images || favorite.custom_origin_images%>
 										<%for(let image of favImages){%>
 											<a class="medias-item border message-lightbox" target="_blank" href="<%:=image.custom_filepath || image.custom_url%>" data-sub-html="#<%:=favorite.uid%>">
 												<img class="lazyload loading w-100 h-100" data-idx="<%:=imgIdex%>" data-src="<%:=image.custom_filepath || image.custom_url%>">
